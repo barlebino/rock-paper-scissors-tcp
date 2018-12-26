@@ -1,3 +1,5 @@
+// TODO: detect disconnections
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -5,6 +7,19 @@
 #include <sys/socket.h>
 
 #include <netinet/in.h>
+
+enum ttt_message {
+  WAIT = 0,
+  ENTER_MOVE = 1,
+  INFO = 2,
+  END_GAME = 3
+};
+
+enum ttt_move {
+  ROCK = 0,
+  PAPER = 1,
+  SCISSORS = 2
+};
 
 int main(int argc, char **argv) {
   int sfd;
@@ -22,16 +37,108 @@ int main(int argc, char **argv) {
   bind(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
   // get two players
-  int p1fd, p2fd;
+  int p0fd, p1fd;
+  int temp_message, temp_player_id;
 
+  // messages
+  // 0 - wait
+  // 1 - enter move
+  // 2 - get info
+  // 3 - end game
+
+  printf("looking for first player\n");
+  listen(sfd, 5);
+  p0fd = accept(sfd, NULL, NULL);
+  temp_message = 0;
+  temp_player_id = 0;
+  write(p0fd, &temp_message, sizeof(int));
+  write(p0fd, &temp_player_id, sizeof(int));
+
+  printf("looking for second player\n");
   listen(sfd, 5);
   p1fd = accept(sfd, NULL, NULL);
+  temp_message = 0;
+  temp_player_id = 1;
+  write(p1fd, &temp_message, sizeof(enum ttt_message));
+  write(p1fd, &temp_player_id, sizeof(int));
 
-  // TODO: wait for second player
+  // prepare 3 rounds of rock, paper, scissors
+  int p0score, p1score;
+  p0score = 0;
+  p1score = 0;
+  for(int i = 0; i < 3; i++) {
+    // ask clients to enter move
+    temp_message = 1;
+    write(p0fd, &temp_message, sizeof(int));
+    write(p1fd, &temp_message, sizeof(int));
 
-  listen(sfd, 5);
-  p2fd = accept(sfd, NULL, NULL);
+    // 0 - rock
+    // 1 - paper
+    // 2 - scissors
 
+    // get moves
+    int p0move, p1move;
+    read(p0fd, &p0move, sizeof(int)); // TODO: size consistency
+    read(p1fd, &p1move, sizeof(int));
+
+    // process moves
+    int match_result = -1;
+    // match result
+    if(p0move == 0) {
+      if(p1move == 0) {
+        match_result = 2;
+      } else if(p1move == 1) {
+        match_result = 1;
+      } else if(p1move == 2) {
+        match_result = 0;
+      }
+    } else if(p0move == 1) {
+      if(p1move == 0) {
+        match_result = 0;
+      } else if(p1move == 1) {
+        match_result = 2;
+      } else if(p1move == 2) {
+        match_result = 1;
+      }
+    } else if(p0move == 2) {
+      if(p1move == 0) {
+        match_result = 1;
+      } else if(p1move == 1) {
+        match_result = 0;
+      } else if(p1move == 2) {
+        match_result = 2;
+      }
+    }
+    // total scores
+    if(match_result == 0) {
+      p0score = p0score + 1;
+    } else if(match_result == 1) {
+      p1score = p1score + 1;
+    }
+
+    // tell clients they'll get info
+    temp_message = 2;
+    write(p0fd, &temp_message, sizeof(int));
+    write(p1fd, &temp_message, sizeof(int));
+    // send match results
+    write(p0fd, &match_result, sizeof(int));
+    write(p1fd, &match_result, sizeof(int));
+    // send total scores
+    write(p0fd, &p0score, sizeof(int));
+    write(p1fd, &p0score, sizeof(int));
+    write(p0fd, &p1score, sizeof(int));
+    write(p1fd, &p1score, sizeof(int));
+  }
+  
+  temp_message = 3;
+  write(p0fd, &temp_message, sizeof(int));
+  write(p1fd, &temp_message, sizeof(int));
+
+  close(sfd);
+
+  return;
+
+  /*
   // get a number from each player
   int p1num, p2num;
   
@@ -44,5 +151,6 @@ int main(int argc, char **argv) {
   // print
   printf("p1num: %d\n", p1num);
   printf("p2num: %d\n", p2num);
+  */
 }
 
