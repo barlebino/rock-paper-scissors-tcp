@@ -12,11 +12,10 @@
 int main(int argc, char **argv) {
   char *hostname = argv[1];
   int port_no = atoi(argv[2]);
-  int message = atoi(argv[3]);
 
   int sfd = socket(AF_INET, SOCK_STREAM, 0);
   
-  // set server information
+  // networking setup
   struct hostent *server;
   struct sockaddr_in serv_addr;
   server = gethostbyname(hostname);
@@ -24,14 +23,13 @@ int main(int argc, char **argv) {
   serv_addr.sin_family = AF_INET;
   memmove(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(port_no);
-
   connect(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
   // game loop
-  int instruction, move, player_number;
-  char input_buffer[32];
+  int player_number;
   while(1) {
     // read instruction from server
+    int instruction;
     read(sfd, &instruction, sizeof(int));
 
     // 0 - wait
@@ -42,17 +40,21 @@ int main(int argc, char **argv) {
     // process instruction
     if(instruction == 0) {
       printf("waiting for an opponent\n");
-      // get player number for the instruction == INFO case
+      // player_number used in instruction == "get info" case
       // player 0 or player 1
       read(sfd, &player_number, sizeof(int));
     } else if(instruction == 1) {
       printf("enter a move (rock, paper, or scissors): ");
-      fflush(0);
+      fflush(0); // fixes interaction between "printf" and "read(0, ...)"
+
+      // get input from the human player
+      char input_buffer[32];
       read(0, input_buffer, 32);
       
       // 0 - rock
       // 1 - paper
       // 2 - scissors
+      int move;
       switch(input_buffer[0]) {
         case 'r':
           move = 0;
@@ -67,6 +69,7 @@ int main(int argc, char **argv) {
           move = 0;
       }
 
+      // send move
       write(sfd, &move, sizeof(int));
     } else if(instruction == 2) {
       // get match result
@@ -81,27 +84,26 @@ int main(int argc, char **argv) {
       }
 
       // get scores
-      int p0score, p1score;
-      read(sfd, &p0score, sizeof(int));
-      read(sfd, &p1score, sizeof(int));
+      int player0_score, player1_score;
+      read(sfd, &player0_score, sizeof(int));
+      read(sfd, &player1_score, sizeof(int));
 
       // show scores
       if(player_number == 0) {
         printf("your total: %d, opponent total: %d\n",
-          p0score, p1score);
+          player0_score, player1_score);
       } else if(player_number == 1) {
         printf("your total: %d, opponent total: %d\n",
-          p1score, p0score);
+          player1_score, player0_score);
       } else { // TODO
         printf("your total: %d, opponent total: %d\n",
-          p0score, p1score);
+          player0_score, player1_score);
       }
     } else if(instruction == 3) {
       printf("end game\n");
       break;
     }
   }
-  write(sfd, &message, sizeof(int));
 
   close(sfd);
 }
