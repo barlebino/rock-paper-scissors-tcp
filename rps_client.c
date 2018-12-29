@@ -14,18 +14,6 @@ int main(int argc, char **argv) {
   int port_no = atoi(argv[2]);
 
   int sfd = socket(AF_INET6, SOCK_STREAM, 0);
-  
-  /*
-  // networking setup
-  struct hostent *server;
-  struct sockaddr_in serv_addr;
-  server = gethostbyname(hostname);
-  memset(&serv_addr, 0, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  memmove(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
-  serv_addr.sin_port = htons(port_no);
-  connect(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-  */
 
   // networking setup
   struct sockaddr_in6 serv_addr;

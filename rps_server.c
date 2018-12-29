@@ -25,19 +25,6 @@ int main(int argc, char **argv) {
   int port_no = atoi(argv[1]);
   int sfd = socket(AF_INET6, SOCK_STREAM, 0);
 
-  /*
-  // server info
-  struct sockaddr_in serv_addr;
-  int port_no = atoi(argv[1]);
-  memset(&serv_addr, 0, sizeof(serv_addr));
-  serv_addr.sin_family = AF_INET;
-  serv_addr.sin_addr.s_addr = INADDR_ANY;
-  serv_addr.sin_port = htons(port_no);
-
-  // bind socket to server info
-  bind(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-  */
-
   // networking setup
   struct sockaddr_in6 serv_addr;
   memset(&serv_addr, 0, sizeof(serv_addr)); // zero out serv_addr
