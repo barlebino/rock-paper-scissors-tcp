@@ -10,11 +10,12 @@
 #include <netdb.h>
 
 int main(int argc, char **argv) {
-  char *hostname = argv[1];
+  char *host_ip = argv[1];
   int port_no = atoi(argv[2]);
 
-  int sfd = socket(AF_INET, SOCK_STREAM, 0);
+  int sfd = socket(AF_INET6, SOCK_STREAM, 0);
   
+  /*
   // networking setup
   struct hostent *server;
   struct sockaddr_in serv_addr;
@@ -23,6 +24,15 @@ int main(int argc, char **argv) {
   serv_addr.sin_family = AF_INET;
   memmove(server->h_addr, &serv_addr.sin_addr.s_addr, server->h_length);
   serv_addr.sin_port = htons(port_no);
+  connect(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+  */
+
+  // networking setup
+  struct sockaddr_in6 serv_addr;
+  memset(&serv_addr, 0, sizeof(serv_addr)); // zero out serv_addr
+  serv_addr.sin6_family = AF_INET6;
+  serv_addr.sin6_port = htons(port_no);
+  inet_pton(AF_INET6, host_ip, &(serv_addr.sin6_addr));
   connect(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
   // game loop

@@ -22,9 +22,10 @@ enum ttt_move {
 };
 
 int main(int argc, char **argv) {
-  int sfd;
-  sfd = socket(AF_INET, SOCK_STREAM, 0);
+  int port_no = atoi(argv[1]);
+  int sfd = socket(AF_INET6, SOCK_STREAM, 0);
 
+  /*
   // server info
   struct sockaddr_in serv_addr;
   int port_no = atoi(argv[1]);
@@ -34,6 +35,15 @@ int main(int argc, char **argv) {
   serv_addr.sin_port = htons(port_no);
 
   // bind socket to server info
+  bind(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+  */
+
+  // networking setup
+  struct sockaddr_in6 serv_addr;
+  memset(&serv_addr, 0, sizeof(serv_addr)); // zero out serv_addr
+  serv_addr.sin6_family = AF_INET6;
+  serv_addr.sin6_port = htons(port_no);
+  serv_addr.sin6_addr = in6addr_any;
   bind(sfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
 
   // get two players
