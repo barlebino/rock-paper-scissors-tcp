@@ -124,20 +124,5 @@ int main(int argc, char **argv) {
   close(sfd);
 
   return;
-
-  /*
-  // get a number from each player
-  int p1num, p2num;
-  
-  read(p1fd, &p1num, sizeof(int));
-  read(p2fd, &p2num, sizeof(int));
-
-  // close socket
-  close(sfd);
-
-  // print
-  printf("p1num: %d\n", p1num);
-  printf("p2num: %d\n", p2num);
-  */
 }
 
