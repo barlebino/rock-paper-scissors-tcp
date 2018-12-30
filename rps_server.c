@@ -8,19 +8,6 @@
 
 #include <netinet/in.h>
 
-enum ttt_message {
-  WAIT = 0,
-  ENTER_MOVE = 1,
-  INFO = 2,
-  END_GAME = 3
-};
-
-enum ttt_move {
-  ROCK = 0,
-  PAPER = 1,
-  SCISSORS = 2
-};
-
 int main(int argc, char **argv) {
   int port_no = atoi(argv[1]);
   int sfd = socket(AF_INET6, SOCK_STREAM, 0);
@@ -56,7 +43,7 @@ int main(int argc, char **argv) {
   p1fd = accept(sfd, NULL, NULL);
   temp_message = 0;
   temp_player_id = 1;
-  write(p1fd, &temp_message, sizeof(enum ttt_message));
+  write(p1fd, &temp_message, sizeof(int));
   write(p1fd, &temp_player_id, sizeof(int));
 
   // prepare 3 rounds of rock, paper, scissors
@@ -117,6 +104,9 @@ int main(int argc, char **argv) {
     temp_message = 2;
     write(p0fd, &temp_message, sizeof(int));
     write(p1fd, &temp_message, sizeof(int));
+    // send opponent move
+    write(p0fd, &p1move, sizeof(int));
+    write(p1fd, &p0move, sizeof(int));
     // send match results
     write(p0fd, &match_result, sizeof(int));
     write(p1fd, &match_result, sizeof(int));

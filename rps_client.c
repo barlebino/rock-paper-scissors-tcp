@@ -11,7 +11,7 @@
 
 int main(int argc, char **argv) {
   char *host_ip = argv[1];
-  int port_no = atoi(argv[2]);
+  int port_no = atoi(argv[2]); // port number
 
   int sfd = socket(AF_INET6, SOCK_STREAM, 0);
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
     // process instruction
     if(instruction == 0) {
-      printf("waiting for an opponent\n");
+      printf("waiting for an opponent\n\n");
       // player_number used in instruction == "get info" case
       // player 0 or player 1
       read(sfd, &player_number, sizeof(int));
@@ -69,7 +69,30 @@ int main(int argc, char **argv) {
 
       // send move
       write(sfd, &move, sizeof(int));
+
+      // wait for opponent text
+      printf("waiting for opponent move\n");
     } else if(instruction == 2) {
+      // get opponent move
+      // 0 - rock
+      // 1 - paper
+      // 2 - scissors
+      int opp_move;
+      read(sfd, &opp_move, sizeof(int));
+      switch(opp_move) {
+        case 0:
+          printf("your opponent entered rock\n");
+          break;
+        case 1:
+          printf("your opponent entered paper\n");
+          break;
+        case 2:
+          printf("your opponent entered scissors\n");
+          break;
+        default: // TODO
+          printf("error");
+      }
+
       // get match result
       int match_result;
       read(sfd, &match_result, sizeof(int));
@@ -88,13 +111,13 @@ int main(int argc, char **argv) {
 
       // show scores
       if(player_number == 0) {
-        printf("your total: %d, opponent total: %d\n",
+        printf("your total score: %d, opponent total score: %d\n\n",
           player0_score, player1_score);
       } else if(player_number == 1) {
-        printf("your total: %d, opponent total: %d\n",
+        printf("your total score: %d, opponent total score: %d\n\n",
           player1_score, player0_score);
       } else { // TODO
-        printf("your total: %d, opponent total: %d\n",
+        printf("your total score: %d, opponent total score: %d\n\n",
           player0_score, player1_score);
       }
     } else if(instruction == 3) {
